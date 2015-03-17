@@ -1,0 +1,6 @@
+24 h 						  =              86400000 millisec
+24 h * 31 days 					  =            2678400000 millisec
+24 h * 31 days * 12 months			  =           32140800000 millisec
+24 h * 31 days * 12 months * 2000 years           =        64281600000000 millisec
+24 h * 31 days * 12 months * 4000 years           =       128563200000000 millisec
+max when 64-bits                                         9007199254740992
