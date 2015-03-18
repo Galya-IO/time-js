@@ -1,3 +1,4 @@
+ 1 h                                              =               3600000 millisec
 24 h 						  =              86400000 millisec
 24 h * 31 days 					  =            2678400000 millisec
 24 h * 31 days * 12 months			  =           32140800000 millisec
