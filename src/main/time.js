@@ -18,17 +18,15 @@ var Time = (function () {
 
     /* TEMP Start */
 
-    //            // Call hidden function
-    //            var isPositionValid = validatePosition.call(this);
+    //    function error(msg) {
+    //        console.error('\r\n' + msg + '\r\n');
+    //        // TODO: stop function
+    //    }
 
     //    function DateExtended(firstName, subject) {
     //        Date.call(this, firstName);
     //    }
     //    DateExtended.prototype = Object.create(Date.prototype);
-
-    //        if (!(date instanceof Date)) {
-    //            throw new Error("Date should be a Time.Date() object.");
-    //        }
 
     /* TEMP End */
 
@@ -58,7 +56,7 @@ var Time = (function () {
             "clone": clone
         };
     }());
-    
+
     var ValidatorGeneral = (function () {
         var isEmpty = function (value) {
             return value === undefined || value === null || value === "";
@@ -67,7 +65,7 @@ var Time = (function () {
         var isInteger = function (value) {
             return (typeof value === 'number') && value % 1 === 0;
         };
-        
+
         return {
             "isEmpty": isEmpty,
             "isInteger": isInteger
@@ -161,43 +159,43 @@ var Time = (function () {
 
     var ValidatorDate = (function () {
         var isVanillaDate = function (value) {
-            return !isEmpty(value) && (value instanceof appContext.Date);
+            return (value instanceof appContext.Date);
         };
 
         var isTimestamp = function (value) {
-            return isInteger(value) && value <= Const.get("MAX_TIMESTAMP") && value >= Const.get("MIN_TIMESTAMP");
+            return ValidatorGeneral.isInteger(value) && value <= Const.get("MAX_TIMESTAMP") && value >= Const.get("MIN_TIMESTAMP");
         };
 
         var isYear = function (value) {
-            return isInteger(value) && value <= Const.get("MAX_YEAR") && value >= Const.get("MIN_YEAR");
+            return ValidatorGeneral.isInteger(value) && value <= Const.get("MAX_YEAR") && value >= Const.get("MIN_YEAR");
         };
 
         var isMonth = function (value) {
-            return isInteger(value) && value <= Const.get("MAX_MONTH") && value >= Const.get("MIN_MONTH");
+            return ValidatorGeneral.isInteger(value) && value <= Const.get("MAX_MONTH") && value >= Const.get("MIN_MONTH");
         };
 
         var isDay = function (value) {
-            return isInteger(value) && value <= Const.get("MAX_DAY") && value >= Const.get("MIN_DAY");
+            return ValidatorGeneral.isInteger(value) && value <= Const.get("MAX_DAY") && value >= Const.get("MIN_DAY");
         };
 
         var isHour = function (value) {
-            return isInteger(value) && value <= Const.get("MAX_HOUR") && value >= Const.get("MIN_HOUR");
+            return ValidatorGeneral.isInteger(value) && value <= Const.get("MAX_HOUR") && value >= Const.get("MIN_HOUR");
         };
 
         var isMinute = function (value) {
-            return isInteger(value) && value <= Const.get("MAX_MINUTE") && value >= Const.get("MIN_MINUTE");
+            return ValidatorGeneral.isInteger(value) && value <= Const.get("MAX_MINUTE") && value >= Const.get("MIN_MINUTE");
         };
 
         var isSecond = function (value) {
-            return isInteger(value) && value <= Const.get("MAX_SECOND") && value >= Const.get("MIN_SECOND");
+            return ValidatorGeneral.isInteger(value) && value <= Const.get("MAX_SECOND") && value >= Const.get("MIN_SECOND");
         };
 
         var isMillisecond = function (value) {
-            return isInteger(value) && value <= Const.get("MAX_MILLISECOND") && value >= Const.get("MIN_MILLISECOND");
+            return ValidatorGeneral.isInteger(value) && value <= Const.get("MAX_MILLISECOND") && value >= Const.get("MIN_MILLISECOND");
         };
 
         var isLeapYear = function (value) {
-            if (!isInteger(value)) {
+            if (!ValidatorGeneral.isInteger(value)) {
                 throw new Error("Year should be an integer number.");
             }
 
@@ -240,7 +238,7 @@ var Time = (function () {
         };
     }());
 
-    var parse = function (dateString, formatType) {
+    var parseToDate = function (dateString, formatType) {
         if ((typeof dateString !== "string") || (typeof formatType !== "string")) {
             throw new Error("Invalid arguments: Expected string for date and format.");
         }
@@ -251,159 +249,155 @@ var Time = (function () {
         return (ValidatorDate.isLeapYear(year)) ? Const.getDaysLeapYear() : Const.getDaysCommonYear();
     };
 
-    var convertVanillaDate = function (date) {
-        if (!ValidatorDate.isVanillaDate(date)) {
-            throw new Error("Invalid argument: Expected vanilla JavaScript Date.");
-        }
-
-        var cutomDate = new Date();
-        cutomDate.year(date.getFullYear());
-        cutomDate.month(date.getMonth());
-        cutomDate.date(date.getDate());
-        cutomDate.hour(date.getHours());
-        cutomDate.minute(date.getMinutes());
-        cutomDate.second(date.getSeconds());
-        cutomDate.millisecond(date.getMilliseconds());
-        return cutomDate;
-    };
-
-//    var convertTimestampToDate = function (timestamp) {
-//        if (!ValidatorDate.isTimestamp(timestamp)) {
-//            throw new Error("Invalid argument: timestamp.");
-//        }
-//
-//        var cutomDate = new Date();
-//
-//        return cutomDate;
-//    };
-
     var Date = (function () {
         // Constructor
-        var Date = function (timestamp) {
+        var Date = function (arg, format) {
             if (!(this instanceof Date)) {
-                return new Date(timestamp);
+                return new Date(arg, format);
             }
 
-            this._year = 0;
-            this._month = 0;
-            this._day = 1;
-            this._hour = 0;
-            this._minute = 0;
-            this._second = 0;
-            this._millisecond = 0;
+            // Private properties
+            var _year = 0;
+            var _month = 0;
+            var _day = 1;
+            var _hour = 0;
+            var _minute = 0;
+            var _second = 0;
+            var _millisecond = 0;
 
-            if (!ValidatorGeneral.isEmpty(timestamp)) {
-                if (!ValidatorDate.isTimestamp(timestamp)) {
-                    throw new Error("Invalid argument: timestamp.");
-                }
-                //TODO: convertTimestampToDate(timestamp);
-            } else {
-                var nowVanillaDate = new appContext.Date();
-                this._year = nowVanillaDate.getFullYear();
-                this._month = nowVanillaDate.getMonth();
-                this._day = nowVanillaDate.getDate();
-                this._hour = nowVanillaDate.getHours();
-                this._minute = nowVanillaDate.getMinutes();
-                this._second = nowVanillaDate.getSeconds();
-                this._millisecond = nowVanillaDate.getMilliseconds();
-            }
-        };
+            // Private methods
+            var setPropertiesFromVanillaDate = function (date) {
+                // TODO: decide if UTC or current time zone time is taken
+                _year = date.getUTCFullYear();
+                _month = date.getUTCMonth();
+                _day = date.getUTCDate();
+                _hour = date.getUTCHours();
+                _minute = date.getUTCMinutes();
+                _second = date.getUTCSeconds();
+                _millisecond = date.getUTCMilliseconds();
+            };
 
-        Date.prototype.year = function (year) {
-            if (ValidatorGeneral.isEmpty(year)) {
-                return this._year;
-            }
-
-            if (ValidatorDate.isYear(year)) {
-                if (!ValidatorDate.isLeapYear(year)) {
-                    if (this._day === 29 && this._month === Const.MONTHS.FEBRUARY) {
-                        throw new Error("Invalid argument: year. Cannot set a common year when the date is 29 February.");
+            // Constructor base
+            if (!ValidatorGeneral.isEmpty(arg)) {
+                if (!ValidatorGeneral.isEmpty(format)) {
+                    if (ValidatorDate.isFormatString(format)) {
+                        // TODO: Parse date as string to Time.Date() obj based on given format string.
+                    } else {
+                        throw new Error("Invalid arguments: Date constructor with 2 parameters expects date string and format string.");
                     }
                 }
 
-                this._year = year;
-                return this;
+                if (ValidatorDate.isVanillaDate(arg)) {
+                    // Converts vanilla Date() obj to Time.Date() obj
+                    setPropertiesFromVanillaDate.call(this, arg);
+                } else if (ValidatorDate.isTimestamp(arg)) {
+                    // TODO: Convert Time.js timestamp number to Time.Date() obj.
+                } else {
+                    throw new Error("Invalid argument: Expected timestamp, vanilla JavaScript Date or no argument.");
+                }
+            } else {
+                // Sets the current time to the newly instantiated Time.Date() obj.
+                var nowVanillaDate = new appContext.Date();
+                setPropertiesFromVanillaDate.call(this, nowVanillaDate);
             }
 
-            throw new Error("Invalid argument: year");
-        };
+            // Privileged methods
+            this.year = function (year) {
+                if (ValidatorGeneral.isEmpty(year)) {
+                    return _year;
+                }
 
-        Date.prototype.month = function (month) {
-            if (ValidatorGeneral.isEmpty(month)) {
-                return this._month;
-            }
+                if (ValidatorDate.isYear(year)) {
+                    if (!ValidatorDate.isLeapYear(year)) {
+                        if (_day === 29 && _month === Const.MONTHS.FEBRUARY) {
+                            throw new Error("Invalid argument: year. Cannot set a common year when the date is 29 February.");
+                        }
+                    }
 
-            if (ValidatorDate.isMonth(month)) {
-                this._month = month;
-                return this;
-            }
+                    _year = year;
+                    return this;
+                }
 
-            throw new Error("Invalid argument: month");
-        };
+                throw new Error("Invalid argument: year");
+            };
 
-        Date.prototype.day = function (day) {
-            if (ValidatorGeneral.isEmpty(day)) {
-                return this._day;
-            }
+            this.month = function (month) {
+                if (ValidatorGeneral.isEmpty(month)) {
+                    return _month;
+                }
 
-            if (ValidatorDate.isDay(day)) {
-                this._day = day;
-                return this;
-            }
+                if (ValidatorDate.isMonth(month)) {
+                    _month = month;
+                    return this;
+                }
 
-            throw new Error("Invalid argument: day");
-        };
+                throw new Error("Invalid argument: month");
+            };
 
-        Date.prototype.hour = function (hour) {
-            if (ValidatorGeneral.isEmpty(hour)) {
-                return this._hour;
-            }
+            this.day = function (day) {
+                if (ValidatorGeneral.isEmpty(day)) {
+                    return _day;
+                }
 
-            if (ValidatorDate.isHour(hour)) {
-                this._hour = hour;
-                return this;
-            }
+                if (ValidatorDate.isDay(day)) {
+                    _day = day;
+                    return this;
+                }
 
-            throw new Error("Invalid argument: hour");
-        };
+                throw new Error("Invalid argument: day");
+            };
 
-        Date.prototype.minute = function (minute) {
-            if (ValidatorGeneral.isEmpty(minute)) {
-                return this._minute;
-            }
+            this.hour = function (hour) {
+                if (ValidatorGeneral.isEmpty(hour)) {
+                    return _hour;
+                }
 
-            if (ValidatorDate.isMinute(minute)) {
-                this._minute = minute;
-                return this;
-            }
+                if (ValidatorDate.isHour(hour)) {
+                    _hour = hour;
+                    return this;
+                }
 
-            throw new Error("Invalid argument: minute");
-        };
+                throw new Error("Invalid argument: hour");
+            };
 
-        Date.prototype.second = function (second) {
-            if (ValidatorGeneral.isEmpty(second)) {
-                return this._second;
-            }
+            this.minute = function (minute) {
+                if (ValidatorGeneral.isEmpty(minute)) {
+                    return _minute;
+                }
 
-            if (ValidatorDate.isSecond(second)) {
-                this._second = second;
-                return this;
-            }
+                if (ValidatorDate.isMinute(minute)) {
+                    _minute = minute;
+                    return this;
+                }
 
-            throw new Error("Invalid argument: second");
-        };
+                throw new Error("Invalid argument: minute");
+            };
 
-        Date.prototype.millisecond = function (millisecond) {
-            if (ValidatorGeneral.isEmpty(millisecond)) {
-                return this._millisecond;
-            }
+            this.second = function (second) {
+                if (ValidatorGeneral.isEmpty(second)) {
+                    return _second;
+                }
 
-            if (ValidatorDate.isMillisecond(millisecond)) {
-                this._millisecond = millisecond;
-                return this;
-            }
+                if (ValidatorDate.isSecond(second)) {
+                    _second = second;
+                    return this;
+                }
 
-            throw new Error("Invalid argument: millisecond");
+                throw new Error("Invalid argument: second");
+            };
+
+            this.millisecond = function (millisecond) {
+                if (ValidatorGeneral.isEmpty(millisecond)) {
+                    return _millisecond;
+                }
+
+                if (ValidatorDate.isMillisecond(millisecond)) {
+                    _millisecond = millisecond;
+                    return this;
+                }
+
+                throw new Error("Invalid argument: millisecond");
+            };
         };
 
         Date.prototype.format = function format(format) {
@@ -415,7 +409,7 @@ var Time = (function () {
         };
 
         Date.prototype.getTimestamp = function () {
-            return this._timestamp;
+            // TODO: 
         };
 
         Date.prototype.getDayOfWeek = function () {
@@ -423,25 +417,24 @@ var Time = (function () {
         };
 
         Date.prototype.isLeapYear = function () {
-            return ValidatorDate.isLeapYear(this._year);
+            return ValidatorDate.isLeapYear(this.year());
         };
 
         Date.prototype.toString = function () {
-            var toString = "timestamp: " + this._timestamp + "\r\n year: " + this._year + "\r\n month: " + this._month
-                    + "\r\n day: " + this._day + "\r\n hour: " + this._hour + "\r\n minute: " + this._minute
-                    + "\r\n second: " + this._second + "\r\n millisecond: " + this._millisecond;
+            var toString = "year: " + this.year() + "\r\n month: " + this.month() + "\r\n day: " + this.day()
+                    + "\r\n hour: " + this.hour() + "\r\n minute: " + this.minute()
+                    + "\r\n second: " + this.second() + "\r\n millisecond: " + this.millisecond();
             return toString;
         };
-
+        
         return Date;
     }());
 
     return {
         "Date": Date,
-        "parse": parse,
-        "get": Const.get,
+        "parseToDate": parseToDate,
+        "getConst": Const.get,
         "isLeapYear": ValidatorDate.isLeapYear,
-        "getDaysInYear": getDaysInYear,
-        "convertVanillaDate": convertVanillaDate
+        "getDaysInYear": getDaysInYear
     };
 }());
